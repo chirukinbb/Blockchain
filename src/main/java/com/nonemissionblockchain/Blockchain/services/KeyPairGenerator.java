@@ -1,24 +1,25 @@
 package com.nonemissionblockchain.Blockchain.services;
 
-import java.security.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.stereotype.Component;
 
+import java.security.*;
+import java.util.Base64;
+
+@Component
 public class KeyPairGenerator {
-    private final PublicKey publicKey;
-    private final PrivateKey privateKey;
+    @JsonProperty("publicKey")
+    public final String publicKey;
+
+    @JsonProperty("privateKey")
+    public final String privateKey;
+
     public KeyPairGenerator() throws NoSuchAlgorithmException {
         java.security.KeyPairGenerator keyGen = java.security.KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
 
         KeyPair keyPair = keyGen.generateKeyPair();
-        this.publicKey = keyPair.getPublic();
-        this.privateKey = keyPair.getPrivate();
-    }
-
-    public PublicKey getPublicKey() {
-        return publicKey;
-    }
-
-    public PrivateKey getPrivateKey() {
-        return privateKey;
+        this.publicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+        this.privateKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
     }
 }

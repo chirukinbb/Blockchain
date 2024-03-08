@@ -1,4 +1,4 @@
-package com.nonemissionblockchain.Blockchain;
+package com.nonemissionblockchain.Blockchain.contracts;
 
 import com.nonemissionblockchain.Blockchain.models.Block;
 import org.springframework.data.mongodb.repository.MongoRepository;

@@ -11,16 +11,14 @@ public class Block {
     private String id;
     private String previousHash; // Хэш предыдущего блока
     private long timestamp; // Временная метка создания блока
-    private List<Transaction> transactions; // Список транзакций в блоке
+    private List<String> transactions; // Список id транзакций в блоке
     private int nonce; // Значение nonce, используемое для поиска правильного хэша блока
-    private String hash; // Хэш текущего блока
 
-    public Block(String previousHash, long timestamp, List<Transaction> transactions, int nonce, String hash) {
+    public Block(String previousHash, long timestamp, List<String> transactions, int nonce, String hash) {
         this.previousHash = previousHash;
         this.timestamp = timestamp;
         this.transactions = transactions;
         this.nonce = nonce;
-        this.hash = hash;
     }
 }
 
