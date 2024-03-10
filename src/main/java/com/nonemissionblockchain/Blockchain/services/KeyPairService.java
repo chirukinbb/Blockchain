@@ -1,48 +1,55 @@
 package com.nonemissionblockchain.Blockchain.services;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.stereotype.Component;
 
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 @Component
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class KeyPairService {
-    @JsonProperty("publicKey")
-    public final String publicKey;
 
-    @JsonProperty("privateKey")
-    public final String privateKey;
+    private final String publicKey;
+    private final String privateKey;
 
-    public KeyPairService() throws NoSuchAlgorithmException {
-        java.security.KeyPairGenerator keyGen = java.security.KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(2048);
+    public KeyPairService() {
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+            keyGen.initialize(2048);
+            KeyPair keyPair = keyGen.generateKeyPair();
 
-        KeyPair keyPair = keyGen.generateKeyPair();
-        this.publicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-        this.privateKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+            this.publicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+            this.privateKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating key pair", e);
+        }
     }
 
-    public static byte[] encodeWithPrivateKey(String data, String privateKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] decodedPrivateKey = Base64.getDecoder().decode(privateKeyString);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedPrivateKey);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-        // Perform encryption
-        // return encryptedData;
-        return null; // Replace null with the actual encrypted data
+    static public boolean verifyWithPublicKey(byte[] data, byte[] signature, String publicKeyString) {
+        try {
+            byte[] decodedPublicKey = Base64.getDecoder().decode(publicKeyString);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedPublicKey);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+            Signature verifySignature = Signature.getInstance("SHA256withRSA");
+            verifySignature.initVerify(publicKey);
+            verifySignature.update(data);
+
+            return verifySignature.verify(signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | InvalidKeySpecException e) {
+            throw new RuntimeException("Error verifying signature with public key", e);
+        }
     }
 
-    public static byte[] decodeWithPublicKey(String encryptedData, String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] decodedPublicKey = Base64.getDecoder().decode(publicKeyString);
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedPublicKey);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = keyFactory.generatePublic(keySpec);
-        // Perform decryption
-        // return decryptedData;
-        return null; // Replace null with the actual decrypted data
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
     }
 }

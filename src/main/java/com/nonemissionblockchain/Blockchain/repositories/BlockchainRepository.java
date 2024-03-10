@@ -4,6 +4,7 @@ import com.nonemissionblockchain.Blockchain.contracts.BlockRepository;
 import com.nonemissionblockchain.Blockchain.contracts.TransactionRepository;
 import com.nonemissionblockchain.Blockchain.contracts.UserRepository;
 import com.nonemissionblockchain.Blockchain.models.Block;
+import com.nonemissionblockchain.Blockchain.models.Transaction;
 import com.nonemissionblockchain.Blockchain.models.User;
 import org.springframework.stereotype.Repository;
 
@@ -27,8 +28,12 @@ public class BlockchainRepository {
         return this.blockRepository.findAll();
     }
 
-    public Optional<Block> block(String id) {
-        return blockRepository.findById(id);
+    public List<Transaction> block(String id) throws Exception {
+        Optional<Block> block = blockRepository.findById(id);
+
+        if (block != null) {
+            return transactionRepository.findAllById(block.get().getTransactions());
+        } else throw new Exception("Block not exists");
     }
 
     public Double getBalance(String address) {

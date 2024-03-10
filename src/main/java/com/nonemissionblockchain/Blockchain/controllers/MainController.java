@@ -13,35 +13,27 @@ import java.util.List;
 public class MainController {
     private final BlockchainRepository blockchainRepository;
 
-    public MainController(BlockchainRepository  blockchainRepository)
-    {
+    public MainController(BlockchainRepository blockchainRepository) {
         this.blockchainRepository = blockchainRepository;
     }
 
     @GetMapping("/")
-    public String index(Model model){
+    public String index(Model model) {
         return "home";
     }
 
     @GetMapping("/blocks")
-    public String viewBlocks(Model model){
+    public String viewBlocks(Model model) {
         List<Block> blocks = this.blockchainRepository.blocks();
-        model.addAttribute("blocks",blocks);
+        model.addAttribute("blocks", blocks);
 
         return "blocks";
     }
 
     @GetMapping("/block/{id}")
-    public String viewBlock(@PathVariable String id,Model model) {
-        model.addAttribute("block",blockchainRepository.block(id));
+    public String viewBlock(@PathVariable String id, Model model) throws Exception {
+        model.addAttribute("transactions", blockchainRepository.block(id));
 
         return "block";
-    }
-
-    @GetMapping("/transaction/{id}")
-    public String viewTransaction(@PathVariable String id,Model model) {
-        model.addAttribute("transaction",blockchainRepository.block(id));
-
-        return "transaction";
     }
 }

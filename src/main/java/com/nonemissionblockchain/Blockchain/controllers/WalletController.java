@@ -24,8 +24,8 @@ public class WalletController {
 
     @PostMapping("/get-private-key")
     public String keysGenerator(@RequestParam String nickname) {
-        String privateKey = this.keyPairService.privateKey;
-        String publicKey = this.keyPairService.publicKey;
+        String privateKey = this.keyPairService.getPrivateKey();
+        String publicKey = this.keyPairService.getPublicKey();
 
         this.userRepository.save(new User(nickname, publicKey));
 
