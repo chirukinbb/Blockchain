@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.stereotype.Component;
 
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 @Component
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -60,5 +64,35 @@ public class KeyPairService {
 
     public PrivateKey getPrivateKey() {
         return privateKey;
+    }
+
+    public static PrivateKey privateKeyFromString(String privateKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyString);
+
+        // Создаем объект PKCS8EncodedKeySpec из декодированных байтов
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+
+        // Получаем приватный ключ из спецификации
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+        return keyFactory.generatePrivate(keySpec);
+    }
+
+    public static PublicKey publicKeyFromString(String publicKeyString) throws Exception {
+        // Декодируем строку из шестнадцатеричного формата
+        byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyString);
+
+        // Создаем объект X509EncodedKeySpec из декодированных байтов
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+
+        // Получаем публичный ключ из спецификации
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+        return keyFactory.generatePublic(keySpec);
+    }
+
+    public static byte[] signatureFromString(String sign) {
+        // Декодируем строку из Base64 в байтовый массив
+        return Base64.getDecoder().decode(sign);
     }
 }
