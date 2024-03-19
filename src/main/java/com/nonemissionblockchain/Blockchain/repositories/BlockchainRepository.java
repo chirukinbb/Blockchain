@@ -37,7 +37,9 @@ public class BlockchainRepository {
     }
 
     public Double getBalance(String address) {
-        return 1.1;
+        User user = userRepository.findByNickname(address);
+
+        return (user == null) ? 0 : user.getBalance();
     }
 
     public String getPublicKey(String nickname) {
@@ -49,5 +51,23 @@ public class BlockchainRepository {
             // Обработка случая, когда пользователь не найден
             return null; // или бросить исключение или вернуть какой-то стандартный ключ
         }
+    }
+
+    public Double balanceForAddressInBlockchain(String address) {
+        double balance = (double) 0;
+        List<Transaction> senders = this.transactionRepository.findBySender(address);
+        List<Transaction> recipients = this.transactionRepository.findByRecipient(address);
+
+        for (Transaction transaction :
+                senders) {
+            balance -= transaction.getAmount();
+        }
+
+        for (Transaction transaction :
+                recipients) {
+            balance += transaction.getAmount();
+        }
+
+        return balance;
     }
 }

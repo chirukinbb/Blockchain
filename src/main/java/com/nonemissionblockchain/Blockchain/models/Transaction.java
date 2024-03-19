@@ -1,7 +1,5 @@
 package com.nonemissionblockchain.Blockchain.models;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -47,16 +45,6 @@ public class Transaction {
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Алгоритм хеширования не найден: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public byte[] toByteArray() {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsBytes(this);
-        } catch (JsonProcessingException e) {
-            System.err.println("Ошибка при преобразовании объекта в массив байтов: " + e.getMessage());
             return null;
         }
     }

@@ -1,7 +1,6 @@
 package com.nonemissionblockchain.Blockchain.controllers;
 
 import com.nonemissionblockchain.Blockchain.contracts.UserRepository;
-import com.nonemissionblockchain.Blockchain.models.User;
 import com.nonemissionblockchain.Blockchain.repositories.BlockchainRepository;
 import com.nonemissionblockchain.Blockchain.services.KeyPairService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,15 +21,17 @@ public class WalletController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/get-private-key")
-    public String keysGenerator(@RequestParam String nickname) {
-        String privateKey = this.keyPairService.getPrivateKey();
-        String publicKey = this.keyPairService.getPublicKey();
-
-        this.userRepository.save(new User(nickname, publicKey));
-
-        return privateKey;
-    }
+//    @PostMapping("/get-private-key")
+//    public String keysGenerator(@RequestParam String nickname) {
+//        String privateKey = this.keyPairService.getPrivateKey();
+//        String publicKey = this.keyPairService.getPublicKey();
+//        User user = new User(nickname, publicKey);
+//        user.addAmount(this.blockchainRepository.balanceForAddressInBlockchain(nickname));
+//
+//        this.userRepository.save(user);
+//
+//        return privateKey;
+//    }
 
     @PostMapping("/get-balance")
     public Double getBalance(@RequestParam String address) {

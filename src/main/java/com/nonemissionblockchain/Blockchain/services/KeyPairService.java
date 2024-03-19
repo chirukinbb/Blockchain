@@ -4,16 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.stereotype.Component;
 
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 @Component
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KeyPairService {
 
-    private final String publicKey;
-    private final String privateKey;
+    private final PublicKey publicKey;
+    private final PrivateKey privateKey;
 
     public KeyPairService() {
         try {
@@ -21,35 +18,47 @@ public class KeyPairService {
             keyGen.initialize(2048);
             KeyPair keyPair = keyGen.generateKeyPair();
 
-            this.publicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-            this.privateKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+            this.publicKey = keyPair.getPublic();
+            this.privateKey = keyPair.getPrivate();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error generating key pair", e);
         }
     }
 
-    static public boolean verifyWithPublicKey(byte[] data, byte[] signature, String publicKeyString) {
+    static public boolean verifyWithPublicKey(String data, byte[] signature, PublicKey publicKey) {
         try {
-            byte[] decodedPublicKey = Base64.getDecoder().decode(publicKeyString);
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedPublicKey);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PublicKey publicKey = keyFactory.generatePublic(keySpec);
-
             Signature verifySignature = Signature.getInstance("SHA256withRSA");
             verifySignature.initVerify(publicKey);
-            verifySignature.update(data);
+            verifySignature.update(data.getBytes());
 
             return verifySignature.verify(signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException("Error verifying signature with public key", e);
         }
     }
 
-    public String getPublicKey() {
+    static public byte[] signWithPrivateKey(String data, PrivateKey privateKey) {
+        try {
+            //byte[] decodedPrivateKey = Base64.getDecoder().decode(privateKeyString);
+            //PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedPrivateKey);
+            //KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            //PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+
+            Signature sign = Signature.getInstance("SHA256withRSA");
+            sign.initSign(privateKey);
+            sign.update(data.getBytes());
+
+            return sign.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException("Error signing data with private key", e);
+        }
+    }
+
+    public PublicKey getPublicKey() {
         return publicKey;
     }
 
-    public String getPrivateKey() {
+    public PrivateKey getPrivateKey() {
         return privateKey;
     }
 }
